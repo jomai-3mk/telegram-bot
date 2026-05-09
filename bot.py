@@ -3,7 +3,7 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters, C
 print("BOT STARTING...")
 
 import os
-TOKEN = os.getenv("8740241159:AAEvzuZt4mF7JSWLtKidr6Hy_o93Kd2uFxg")
+TOKEN = os.getenv("TOKEN")
 
 teachers = set()
 students = set()
