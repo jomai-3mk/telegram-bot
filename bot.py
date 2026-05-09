@@ -4,7 +4,7 @@ import os
 
 print("BOT STARTING...")
 
-# التوكن من Environment Variables في Render
+# التوكن الصحيح من Environment Variables
 TOKEN = os.getenv("TOKEN")
 
 if not TOKEN:
@@ -32,7 +32,6 @@ message_map = {
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id
-
     students.add(user_id)
     teachers.discard(user_id)
 
@@ -43,7 +42,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def teacher(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id
-
     teachers.add(user_id)
     students.discard(user_id)
 
@@ -51,7 +49,6 @@ async def teacher(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def student(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id
-
     students.add(user_id)
     teachers.discard(user_id)
 
@@ -78,20 +75,17 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("تم إرسال الطلب")
 
 
-# بناء التطبيق
-app = Application.builder().token(TOKEN).build()
+def main():
+    app = Application.builder().token(TOKEN).build()
 
-app.add_handler(CommandHandler("start", start))
-app.add_handler(CommandHandler("teacher", teacher))
-app.add_handler(CommandHandler("student", student))
-app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("teacher", teacher))
+    app.add_handler(CommandHandler("student", student))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
+    print("RUNNING BOT...")
+    app.run_polling()
 
 
 if __name__ == "__main__":
-    print("RUNNING BOT...")
-
-    try:
-        app.run_polling()
-    except Exception as e:
-        print("BOT CRASHED:")
-        print(e)
+    main()
