@@ -1,7 +1,9 @@
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+print("BOT STARTING...")
 
-TOKEN = "8740241159:AAEUJh_5NK2OrHbWhSvnPmIHk1Wcv9d7-eo"
+import os
+TOKEN = os.getenv("8740241159:AAEUJh_5NK2OrHbWhSvnPmIHk1Wcv9d7-eo")
 
 teachers = set()
 students = set()
@@ -80,4 +82,13 @@ app.add_handler(CommandHandler("teacher", teacher))
 app.add_handler(CommandHandler("student", student))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
-app.run_polling()
+import asyncio
+
+async def main():
+    await app.initialize()
+    await app.start()
+    await app.updater.start_polling()
+    await app.updater.idle()
+
+if __name__ == "__main__":
+    asyncio.run(main())
