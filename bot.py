@@ -1,20 +1,28 @@
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+import os
+
 print("BOT STARTING...")
 
-import os
+# التوكن من Render Environment Variables
 TOKEN = os.getenv("TOKEN")
+
+if not TOKEN:
+    raise ValueError("TOKEN is missing! Check Render Environment Variables")
 
 teachers = set()
 students = set()
 
-# الأزرار (إيموجيات)
-keyboard = ReplyKeyboardMarkup([
-    ["🚻", "🍔"],
-    ["💧", "🆘"]
-], resize_keyboard=True)
+# لوحة الأزرار
+keyboard = ReplyKeyboardMarkup(
+    [
+        ["🚻", "🍔"],
+        ["💧", "🆘"]
+    ],
+    resize_keyboard=True
+)
 
-# رسائل لكل إيموجي
+# رسائل الحالات
 message_map = {
     "🚻": "الطالب يريد الذهاب للحمام",
     "🍔": "الطالب جائع",
@@ -22,7 +30,7 @@ message_map = {
     "🆘": "الطالب يحتاج مساعدة"
 }
 
-# بدء البوت (طالب)
+# بدء الطالب
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id
 
@@ -43,23 +51,22 @@ async def teacher(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text("تم تسجيلك كمدرس")
 
-# تحويل إلى طالب مرة ثانية
+# تحويل لطالب
 async def student(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id
 
-    teachers.discard(user_id)
     students.add(user_id)
+    teachers.discard(user_id)
 
     await update.message.reply_text("تم تحويلك إلى طالب")
 
-# استقبال الضغط على الأزرار
+# استقبال الأزرار
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
     user_id = update.effective_chat.id
 
     if text in message_map:
 
-        # يمنع المدرس من إرسال طلبات بالغلط
         if user_id in teachers:
             await update.message.reply_text("أنت مدرس لا ترسل طلبات")
             return
@@ -74,7 +81,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         await update.message.reply_text("تم إرسال الطلب")
 
-# تشغيل التطبيق
+# بناء التطبيق
 app = Application.builder().token(TOKEN).build()
 
 app.add_handler(CommandHandler("start", start))
@@ -82,13 +89,6 @@ app.add_handler(CommandHandler("teacher", teacher))
 app.add_handler(CommandHandler("student", student))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
-import asyncio
-
-async def main():
-    await app.initialize()
-    await app.start()
-    await app.updater.start_polling()
-    await app.updater.idle()
-
+# تشغيل صحيح لـ Render
 if __name__ == "__main__":
-    asyncio.run(main())
+    app.run_polling()
