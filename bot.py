@@ -87,7 +87,11 @@ app.add_handler(CommandHandler("student", student))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
 
-# تشغيل مباشر على Render (المهم)
 if __name__ == "__main__":
     print("RUNNING BOT...")
-    app.run_polling()
+
+    try:
+        app.run_polling()
+    except Exception as e:
+        print("BOT CRASHED:")
+        print(e)
