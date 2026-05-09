@@ -5,7 +5,9 @@ import os
 print("BOT STARTING...")
 
 # التوكن من Render Environment Variables
-TOKEN = os.getenv("TOKEN")
+print("TOKEN =", os.getenv("TOKEN"))
+print("STARTED")
+print("TOKEN:", TOKEN)
 
 if not TOKEN:
     raise ValueError("TOKEN is missing! Check Render Environment Variables")
