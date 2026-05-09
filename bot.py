@@ -2,15 +2,10 @@ from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 import os
 
-print("BOT STARTING...")
-
-TOKEN = os.environ.get("TOKEN")
+TOKEN = os.getenv("TOKEN")
 
 if not TOKEN:
-    print("TOKEN NOT FOUND")
-    exit()
-
-print("TOKEN LOADED")
+    raise ValueError("TOKEN missing")
 
 teachers = set()
 students = set()
@@ -31,21 +26,18 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     uid = update.effective_chat.id
     students.add(uid)
     teachers.discard(uid)
-
     await update.message.reply_text("اختر الحالة:", reply_markup=keyboard)
 
 async def teacher(update: Update, context: ContextTypes.DEFAULT_TYPE):
     uid = update.effective_chat.id
     teachers.add(uid)
     students.discard(uid)
-
     await update.message.reply_text("تم تسجيلك كمدرس")
 
 async def student(update: Update, context: ContextTypes.DEFAULT_TYPE):
     uid = update.effective_chat.id
     students.add(uid)
     teachers.discard(uid)
-
     await update.message.reply_text("تم تحويلك إلى طالب")
 
 async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -62,6 +54,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         await update.message.reply_text("تم الإرسال")
 
+
 def main():
     app = Application.builder().token(TOKEN).build()
 
@@ -70,7 +63,7 @@ def main():
     app.add_handler(CommandHandler("student", student))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle))
 
-    print("RUNNING BOT...")
+    print("BOT RUNNING")
     app.run_polling()
 
 if __name__ == "__main__":
