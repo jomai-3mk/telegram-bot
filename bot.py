@@ -1,17 +1,17 @@
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 import os
+import asyncio
 
 print("BOT STARTING...")
 
-# أخذ التوكن بشكل صحيح
+# التوكن من Environment Variables في Render
 TOKEN = os.getenv("TOKEN")
 
-print("TOKEN =", TOKEN)
-print("STARTED")
-
 if not TOKEN:
-    raise ValueError("TOKEN is missing! Check Render Environment Variables")
+    raise ValueError("TOKEN is missing! Set it in Render Environment Variables")
+
+print("TOKEN LOADED")
 
 teachers = set()
 students = set()
@@ -33,6 +33,7 @@ message_map = {
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id
+
     students.add(user_id)
     teachers.discard(user_id)
 
@@ -43,6 +44,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def teacher(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id
+
     teachers.add(user_id)
     students.discard(user_id)
 
@@ -50,6 +52,7 @@ async def teacher(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def student(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id
+
     students.add(user_id)
     teachers.discard(user_id)
 
@@ -75,6 +78,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         await update.message.reply_text("تم إرسال الطلب")
 
+
+# بناء التطبيق
 app = Application.builder().token(TOKEN).build()
 
 app.add_handler(CommandHandler("start", start))
@@ -82,5 +87,14 @@ app.add_handler(CommandHandler("teacher", teacher))
 app.add_handler(CommandHandler("student", student))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
+
+# تشغيل مناسب لـ Render
+async def main():
+    await app.initialize()
+    await app.start()
+    await app.updater.start_polling()
+    await app.updater.idle()
+
+
 if __name__ == "__main__":
-    app.run_polling()
+    asyncio.run(main())
