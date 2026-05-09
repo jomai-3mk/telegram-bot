@@ -4,10 +4,11 @@ import os
 
 print("BOT STARTING...")
 
-# التوكن من Render Environment Variables
-print("TOKEN =", os.getenv("TOKEN"))
+# أخذ التوكن بشكل صحيح
+TOKEN = os.getenv("TOKEN")
+
+print("TOKEN =", TOKEN)
 print("STARTED")
-print("TOKEN:", TOKEN)
 
 if not TOKEN:
     raise ValueError("TOKEN is missing! Check Render Environment Variables")
@@ -15,7 +16,6 @@ if not TOKEN:
 teachers = set()
 students = set()
 
-# لوحة الأزرار
 keyboard = ReplyKeyboardMarkup(
     [
         ["🚻", "🍔"],
@@ -24,7 +24,6 @@ keyboard = ReplyKeyboardMarkup(
     resize_keyboard=True
 )
 
-# رسائل الحالات
 message_map = {
     "🚻": "الطالب يريد الذهاب للحمام",
     "🍔": "الطالب جائع",
@@ -32,10 +31,8 @@ message_map = {
     "🆘": "الطالب يحتاج مساعدة"
 }
 
-# بدء الطالب
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id
-
     students.add(user_id)
     teachers.discard(user_id)
 
@@ -44,25 +41,20 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=keyboard
     )
 
-# تسجيل مدرس
 async def teacher(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id
-
     teachers.add(user_id)
     students.discard(user_id)
 
     await update.message.reply_text("تم تسجيلك كمدرس")
 
-# تحويل لطالب
 async def student(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id
-
     students.add(user_id)
     teachers.discard(user_id)
 
     await update.message.reply_text("تم تحويلك إلى طالب")
 
-# استقبال الأزرار
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
     user_id = update.effective_chat.id
@@ -83,7 +75,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         await update.message.reply_text("تم إرسال الطلب")
 
-# بناء التطبيق
 app = Application.builder().token(TOKEN).build()
 
 app.add_handler(CommandHandler("start", start))
@@ -91,6 +82,5 @@ app.add_handler(CommandHandler("teacher", teacher))
 app.add_handler(CommandHandler("student", student))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
-# تشغيل صحيح لـ Render
 if __name__ == "__main__":
     app.run_polling()
