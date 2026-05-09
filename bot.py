@@ -1,7 +1,6 @@
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 import os
-import asyncio
 
 print("BOT STARTING...")
 
@@ -88,13 +87,7 @@ app.add_handler(CommandHandler("student", student))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
 
-# تشغيل مناسب لـ Render
-async def main():
-    await app.initialize()
-    await app.start()
-    await app.updater.start_polling()
-    await app.updater.idle()
-
-
+# تشغيل مباشر على Render (المهم)
 if __name__ == "__main__":
-    asyncio.run(main())
+    print("RUNNING BOT...")
+    app.run_polling()
